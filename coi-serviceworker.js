@@ -1,25 +1,14 @@
 const CACHE_NAME = "rblx-cache-v1";
 
 // List all the files you want to cache here
+// Large files (rblx.wasm, rblx.data.*) are intentionally excluded to avoid
+// exhausting iOS Cache API storage limits and causing install crashes on iPad.
 const FILES_TO_CACHE = [
-  "/", // Good practice to cache the root path too
+  "/",
   "/index.html",
   "/rblx.js",
-  "/rblx.wasm",
   "/manifest.json",
-  "/Roblox_Logo_2025.png",
-  "/rblx.data.0",
-  "/rblx.data.1",
-  "/rblx.data.2",
-  "/rblx.data.3",
-  "/rblx.data.4",
-  "/rblx.data.5",
-  "/rblx.data.6",
-  "/rblx.data.7",
-  "/rblx.data.8",
-  "/rblx.data.9",
-  "/rblx.data.10",
-  "/rblx.data.11"
+  "/Roblox_Logo_2025.png"
 ];
 
 // 1. Install event: Open cache and add all files
