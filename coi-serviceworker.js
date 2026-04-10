@@ -1,14 +1,25 @@
 const CACHE_NAME = "rblx-cache-v1";
 
 // List all the files you want to cache here
-// Large files (rblx.wasm, rblx.data.*) are intentionally excluded to avoid
-// exhausting iOS Cache API storage limits and causing install crashes on iPad.
 const FILES_TO_CACHE = [
-  "/",
+  "/", // Good practice to cache the root path too
   "/index.html",
   "/rblx.js",
+  "/rblx.wasm",
   "/manifest.json",
-  "/Roblox_Logo_2025.png"
+  "/Roblox_Logo_2025.png",
+  "/rblx.data.0",
+  "/rblx.data.1",
+  "/rblx.data.2",
+  "/rblx.data.3",
+  "/rblx.data.4",
+  "/rblx.data.5",
+  "/rblx.data.6",
+  "/rblx.data.7",
+  "/rblx.data.8",
+  "/rblx.data.9",
+  "/rblx.data.10",
+  "/rblx.data.11"
 ];
 
 // 1. Install event: Open cache and add all files
@@ -58,17 +69,9 @@ self.addEventListener("fetch", (e) => {
       }
 
       // --- NETWORK FALLBACK ---
-      // Not in cache — fetch from the network and store the result so subsequent
-      // requests (and offline play after the first load) can be served from cache.
+      // Not in cache, fetch from the internet
       return fetch(e.request)
         .then((networkResponse) => {
-          // Only cache successful same-origin responses
-          if (networkResponse.ok) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(e.request, responseToCache);
-            });
-          }
           const headers = addHeaders(networkResponse.headers);
           return new Response(networkResponse.body, {
             status: networkResponse.status,
