@@ -58,9 +58,17 @@ self.addEventListener("fetch", (e) => {
       }
 
       // --- NETWORK FALLBACK ---
-      // Not in cache, fetch from the internet
+      // Not in cache — fetch from the network and store the result so subsequent
+      // requests (and offline play after the first load) can be served from cache.
       return fetch(e.request)
         .then((networkResponse) => {
+          // Only cache successful same-origin responses
+          if (networkResponse.ok) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(e.request, responseToCache);
+            });
+          }
           const headers = addHeaders(networkResponse.headers);
           return new Response(networkResponse.body, {
             status: networkResponse.status,
