@@ -42,9 +42,6 @@
             font-size: 24px;
         }
     </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="icon" href="data:,">
     <link rel="manifest" href="/manifest.json">
     <script>if ('serviceWorker' in navigator) {
@@ -70,32 +67,24 @@
     var CHUNK_COUNT = 12;
     var loaded = 0;
 
-    var chunksPromise = (function () {
-      var chunks = [];
-      var p = Promise.resolve();
-      for (var i = 0; i < CHUNK_COUNT; i++) {
-        (function (idx) {
-          p = p.then(function () {
-            return fetch('rblx.data.' + idx).then(function (r) {
-              if (!r.ok) throw new Error('chunk ' + idx + ' failed');
-              return r.arrayBuffer().then(function (b) {
-                loaded++;
-                loadingText.textContent = 'Loading ' + Math.round(loaded / CHUNK_COUNT * 100) + '%';
-                chunks.push(b);
-              });
-            });
+    var chunksPromise = Promise.all(
+      Array.from({ length: CHUNK_COUNT }, function (_, i) {
+        return fetch('rblx.data.' + i).then(function (r) {
+          if (!r.ok) throw new Error('chunk ' + i + ' failed');
+          return r.arrayBuffer().then(function (b) {
+            loaded++;
+            loadingText.textContent = 'Loading ' + Math.round(loaded / CHUNK_COUNT * 100) + '%';
+            return b;
           });
-        })(i);
-      }
-      return p.then(function () {
-        var total = chunks.reduce(function (s, c) { return s + c.byteLength; }, 0);
-        var out   = new Uint8Array(total);
-        var off   = 0;
-        chunks.forEach(function (c) { out.set(new Uint8Array(c), off); off += c.byteLength; });
-        chunks = [];
-        return URL.createObjectURL(new Blob([out], { type: 'application/octet-stream' }));
-      });
-    })();
+        });
+      })
+    ).then(function (chunks) {
+      var total = chunks.reduce(function (s, c) { return s + c.byteLength; }, 0);
+      var out   = new Uint8Array(total);
+      var off   = 0;
+      chunks.forEach(function (c) { out.set(new Uint8Array(c), off); off += c.byteLength; });
+      return URL.createObjectURL(new Blob([out], { type: 'application/octet-stream' }));
+    });
 
     var _origFetch = window.fetch.bind(window);
     window.fetch = function (resource, init) {
@@ -120,11 +109,6 @@
       },
       onRuntimeInitialized: function () { loadingDiv.style.display = 'none'; }
     };
-
-    document.getElementById('canvas').addEventListener('webglcontextlost', function (e) {
-      e.preventDefault();
-      alert('The graphics context was lost (likely due to low memory). Please reload the page.');
-    }, false);
 
     var s = document.createElement('script');
     s.src = 'rblx.js';
