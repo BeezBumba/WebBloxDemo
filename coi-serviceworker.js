@@ -7,6 +7,7 @@ const FILES_TO_CACHE = [
   "/rblx.js",
   "/rblx.wasm",
   "/manifest.json",
+  "/Roblox_Logo_2025.png",
   "/rblx.data.0",
   "/rblx.data.1",
   "/rblx.data.2",
